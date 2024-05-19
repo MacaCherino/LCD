@@ -165,7 +165,7 @@ module lbb5;
 		
 		// no se reciben los mismos datos que se envían
 		// no se activa block_lock
-		// SI se activa nunca high_ber
+		// SI se activa high_ber
 		// status_rx no se activa
 		// bitslip se activa
 		// contador de errores es 0

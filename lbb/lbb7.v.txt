@@ -1,7 +1,7 @@
 `timescale 1ns/1ns
 `include "eth_phy_10g.v"
 
-module lbb6;
+module lbb7;
 
 	parameter DATA_WIDTH_TB = 64;			
 	parameter CTRL_WIDTH_TB = (DATA_WIDTH_TB/8);	
@@ -45,8 +45,8 @@ module lbb6;
 	integer count;
 
     	initial begin
-        	$dumpfile("lbb6.vcd");
-        	$dumpvars(0, lbb6);
+        	$dumpfile("lbb7.vcd");
+        	$dumpvars(0, lbb7);
     	end
 
     	eth_phy_10g #(
@@ -120,7 +120,7 @@ module lbb6;
 	end
 
 	always begin
-		#200
+		#50
 		serdes_rx_hdr_tb = 2'b11;
 		#50
 		serdes_rx_hdr_tb = 2'b10;
@@ -139,7 +139,7 @@ module lbb6;
 
 		#1000
 		// se reciben los mismos datos que se envían excepto cuando se cambia el encabezado por uno invalido
-		// se activa block_lock y se desactiva cuando llega el encabezado invalido
+		// no se activa block_lock
 		// SI se activa high_ber
 		// status_rx NO se activa
 		// bitslip SI se activa
