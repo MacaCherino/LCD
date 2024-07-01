@@ -47,7 +47,8 @@ module tb_noise1;
     integer count_inv_hdr;
 
     real random_number;
-    real ber;
+
+    localparam BER = 1e-1;
 
     initial begin
         $dumpfile("tb_noise1.vcd");
@@ -106,7 +107,7 @@ module tb_noise1;
     	end else begin
 			serdes_rx_data_tb <= serdes_tx_data_tb;
             random_number <= $urandom/ (2.0**32 - 1);
-            if (random_number<ber) begin
+            if (random_number<BER) begin
                 serdes_rx_hdr_tb <= 2'b11;
                 count_inv_hdr <= count_inv_hdr + 1;
             end else begin
@@ -147,12 +148,11 @@ module tb_noise1;
 		count = 1;
 		count_hdr = 0;
         count_inv_hdr=0;
-        ber = 1e-1;
 
 		#200
-		$display("BER: %0.001f", ber);
-		$display("Cantidad de Headers Validos: %d/100", count_hdr);
-		$display("Cantidad de Headers Invalidos: %d/100", count_inv_hdr);
+		$display("BER: %0.002f", BER);
+		$display("Cantidad de Headers Validos: %0d/%0d", count_hdr, count_hdr+count_inv_hdr);
+		$display("Cantidad de Headers Invalidos: %0d/%0d", count_inv_hdr, count_hdr+count_inv_hdr);
 		
 		$finish;
     end
