@@ -47,9 +47,9 @@ module tb_noise1;
     integer count_inv_hdr;
 
     real random_number;
-    real ber;
 
     localparam TOTAL_HDR = 100;
+    localparam BER = 1e-2;
 
     initial begin
         $dumpfile("tb_noise1.vcd");
@@ -108,7 +108,7 @@ module tb_noise1;
     	end else begin
 			serdes_rx_data_tb <= serdes_tx_data_tb;
             random_number <= $urandom/ (2.0**32 - 1);
-            if (random_number<ber) begin
+            if (random_number<BER) begin
                 serdes_rx_hdr_tb <= 2'b11;
                 count_inv_hdr <= count_inv_hdr + 1;
             end else begin
@@ -116,7 +116,7 @@ module tb_noise1;
                 count_hdr <= count_hdr + 1;
             end
             if (count_hdr+count_inv_hdr>=TOTAL_HDR) begin
-                $display("BER: %0.001f", ber);
+                $display("BER: %0.02f", BER);
                 $display("Cantidad de Headers Validos: %0d/%0d", count_hdr, TOTAL_HDR);
                 $display("Cantidad de Headers Invalidos: %0d/%0d", count_inv_hdr, TOTAL_HDR);
             
@@ -148,14 +148,13 @@ module tb_noise1;
         #10;
         rx_rst_tb = 1'b0;
         tx_rst_tb = 1'b0;
-		clk_tb = 1'b0;
-		cfg_tx_prbs31_enable_tb <= 0;
+	clk_tb = 1'b0;
+	cfg_tx_prbs31_enable_tb <= 0;
     	cfg_rx_prbs31_enable_tb <= 0;
     	xgmii_txc_tb = 8'h00;
-		xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
-		count = 1;
-		count_hdr = 0;
+	xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
+	count = 1;
+	count_hdr = 0;
         count_inv_hdr = 0;
-        ber = 1e-1;
     end
 endmodule
