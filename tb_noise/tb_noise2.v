@@ -1,7 +1,7 @@
 `timescale 1ns/1ns
 `include "eth_phy_10g.v"
 
-module tb_noise1;
+module tb_noise2;
 
 	parameter DATA_WIDTH_TB = 64;			
 	parameter CTRL_WIDTH_TB = (DATA_WIDTH_TB/8);	
@@ -45,15 +45,17 @@ module tb_noise1;
 	integer count;
 	integer count_hdr;
     integer count_inv_hdr;
+	integer count_hdr_consec;
+	integer block_flag;
 
     real random_number;
 
-    localparam TOTAL_HDR = 100;
-    localparam BER = 1e-2;
+    localparam TOTAL_HDR = 500;
+    localparam BER = 0.01; // 0.07613 es el limite para activar block lock
 
     initial begin
-        $dumpfile("tb_noise1.vcd");
-        $dumpvars(0, tb_noise1);
+        $dumpfile("tb_noise2.vcd");
+        $dumpvars(0, tb_noise2);
     end
 
     eth_phy_10g #(
@@ -111,15 +113,21 @@ module tb_noise1;
             if (random_number<BER) begin
                 serdes_rx_hdr_tb <= 2'b11;
                 count_inv_hdr <= count_inv_hdr + 1;
+				count_hdr_consec <= 0;
             end else begin
                 serdes_rx_hdr_tb <= 2'b10;
                 count_hdr <= count_hdr + 1;
+				count_hdr_consec <= count_hdr_consec + 1;
+				if (rx_block_lock_tb && block_flag) begin
+					$display("- Headers Enviados hasta activar block lock: %d", count_hdr + count_inv_hdr);
+					block_flag = 0;
+				end
             end
             if (count_hdr+count_inv_hdr>=TOTAL_HDR) begin
-                $display("BER: %0.02f", BER);
-                $display("Cantidad de Headers Validos: %0d/%0d", count_hdr, TOTAL_HDR);
+                $display("BER: %0.05f", BER);
+                $display("Cantidad de Headers Validos:  %0d/%0d", count_hdr, TOTAL_HDR);
                 $display("Cantidad de Headers Invalidos: %0d/%0d", count_inv_hdr, TOTAL_HDR);
-            
+				$display("Block Lock: %d",rx_block_lock_tb);
                 $finish;
             end
         end
@@ -148,13 +156,15 @@ module tb_noise1;
         #10;
         rx_rst_tb = 1'b0;
         tx_rst_tb = 1'b0;
-	clk_tb = 1'b0;
-	cfg_tx_prbs31_enable_tb <= 0;
+		clk_tb = 1'b0;
+		cfg_tx_prbs31_enable_tb <= 0;
     	cfg_rx_prbs31_enable_tb <= 0;
     	xgmii_txc_tb = 8'h00;
-	xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
-	count = 1;
-	count_hdr = 0;
+		xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
+		count = 1;
+		count_hdr = 0;
         count_inv_hdr = 0;
+		count_hdr_consec = 0;
+		block_flag = 1;
     end
 endmodule
