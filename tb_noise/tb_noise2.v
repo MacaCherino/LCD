@@ -109,7 +109,7 @@ module tb_noise2;
         	serdes_rx_data_tb <= 64'b0;
     		end else begin
 	    		serdes_rx_data_tb <= serdes_tx_data_tb;
-            		random_number <= $urandom/ (2.0**32 - 1);
+            		random_number     <= $urandom/ (2.0**32 - 1);
             		if (random_number<BER) begin
                 		serdes_rx_hdr_tb <= 2'b11;
                 		count_inv_hdr    <= count_inv_hdr + 1;
@@ -134,20 +134,21 @@ module tb_noise2;
 
 	end
 
-	always begin
-		#10
-		(@posedge clk_tb)
-		case (count)
-			0: xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
-			1: xgmii_txd_tb = 64'h0;
-			2: xgmii_txd_tb = 64'h555555555555555;
-			3: xgmii_txd_tb = 64'hAAAAAAAAAAAAA;
-			4: xgmii_txd_tb = 64'hFEFEFEFEFEFEFEFE;
-			5: xgmii_txd_tb = 64'h0707070707070707;
-		endcase
-		count = count + 1;
-		if (count == 6) begin
-			count = 0;
+	always (@posedge clk_tb) begin
+		if (!tx_rst_tb) begin
+			case (count)
+				0: xgmii_txd_tb <= 64'hFFFFFFFFFFFFFFFF;
+				1: xgmii_txd_tb <= 64'h0;
+				2: xgmii_txd_tb <= 64'h5555555555555555;
+				3: xgmii_txd_tb <= 64'hAAAAAAAAAAAAAAAA;
+				4: xgmii_txd_tb <= 64'hFEFEFEFEFEFEFEFE;
+				5: xgmii_txd_tb <= 64'h0707070707070707;
+			endcase
+			count <= count + 1;
+			if (count == 6) begin
+				count <= 0;
+			end
+			#10
 		end
 	end
 
@@ -162,6 +163,9 @@ module tb_noise2;
 
 		xgmii_txc_tb = 8'h00;
 		xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
+
+		serdes_rx_data_tb = 64'h0;
+		serdes_rx_hdr_tb  = 2'b0;
 
 		count            = 1;
 		count_hdr        = 0;
