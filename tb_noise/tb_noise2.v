@@ -136,7 +136,7 @@ module tb_noise2;
 
 	always begin
 		#10
-		(@posedge clk_tb)
+		(@posedge clk_tb and !tx_rst_tb)
 		case (count)
 			0: xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
 			1: xgmii_txd_tb = 64'h0;
@@ -159,18 +159,20 @@ module tb_noise2;
 		clk_tb    = 1'b0;
         	rx_rst_tb = 1'b1;
         	tx_rst_tb = 1'b1;
-        	#10;
-		(@posedge clk_tb);
-        	rx_rst_tb = 1'b0;
-        	tx_rst_tb = 1'b0;
-	    
-    		xgmii_txc_tb = 8'h00;
+
+		xgmii_txc_tb = 8'h00;
 		xgmii_txd_tb = 64'hFFFFFFFFFFFFFFFF;
-	    
+
 		count            = 1;
 		count_hdr        = 0;
         	count_inv_hdr    = 0;
 		count_hdr_consec = 0;
 		block_flag       = 1;
+		
+        	#10;
+		(@posedge clk_tb);
+        	rx_rst_tb = 1'b0;
+        	tx_rst_tb = 1'b0;
+	    
     	end
 endmodule
