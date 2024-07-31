@@ -167,12 +167,16 @@ module tb_noise_unlock;
 			endcase
 			#50;
 
-        end else begin
-            count        <= 0;
-            xgmii_txc_tb <= 8'h00;
-            xgmii_txd_tb <= 64'hFFFFFFFFFFFFFFFF;
         end
 	end
+
+    always @(posedge tx_rst_tb) begin
+        @(posedge tx_clk_tb);
+        count        <= 0;
+        xgmii_txc_tb <= 8'h00;
+        xgmii_txd_tb <= 64'hFFFFFFFFFFFFFFFF;
+    end
+
 
     // Configuracion inicial de Tx
     initial begin
