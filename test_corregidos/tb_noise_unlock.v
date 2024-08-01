@@ -46,7 +46,6 @@ module tb_noise_unlock;
 	integer count           ;       // Contador para iterar patron de xgmii_txd
 	integer count_hdr       ;       // Contador de encabezados validos
     integer count_inv_hdr   ;       // Contador de encabezados invalidos
-	integer count_hdr_consec;       // Contador de encabezados consecutivos
 	integer block_flag      ;       // Bandera para indicar cuando ocurrio el block lock
 
     real random_number;             // Numero random para comparar con BER
@@ -110,7 +109,6 @@ module tb_noise_unlock;
             serdes_rx_hdr_tb  <= 2'b0 ;
 		    count_hdr         <= 0    ;
             count_inv_hdr     <= 0    ;
-		    count_hdr_consec  <= 0    ;
 		    block_flag        <= 0    ;
 
     	end else begin
@@ -130,11 +128,12 @@ module tb_noise_unlock;
                     count_hdr     <= 0;
                     count_inv_hdr <= 0;
                 end
-
-				if (!rx_block_lock_tb && block_flag == 1) begin
-					$display("- Headers Enviados hasta desactivar block lock: %d", count_hdr + count_inv_hdr);
-					block_flag <= 2;
-				end
+                if (count_hdr+count_inv_hdr < TOTAL_HDR) begin
+                    if (!rx_block_lock_tb && block_flag == 1) begin
+                        $display("- Headers Enviados hasta desactivar block lock: %d", count_hdr + count_inv_hdr);
+                        block_flag <= 2;
+                    end
+                end
 
             end
 
@@ -142,7 +141,7 @@ module tb_noise_unlock;
                 $display("BER: %0.05f", BER);
                 $display("Cantidad de Headers Validos:  %0d/%0d", count_hdr, TOTAL_HDR);
                 $display("Cantidad de Headers Invalidos: %0d/%0d", count_inv_hdr, TOTAL_HDR);
-				$display("Block Lock: %d",rx_block_lock_tb);
+				$display("Block Lock: %d\n",rx_block_lock_tb);
             end
 
         end
@@ -216,7 +215,6 @@ module tb_noise_unlock;
         count            = 0;   // Contador para iterar patron de xgmii_txd
         count_hdr        = 0;   // Contador de encabezados validos
         count_inv_hdr    = 0;   // Contador de encabezados invalidos
-        count_hdr_consec = 0;   // Contador de encabezados consecutivos
         block_flag       = 0;   // Bandera para indicar cuando ocurrio el block lock
 
         #10000

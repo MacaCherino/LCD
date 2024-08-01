@@ -43,16 +43,16 @@ module tb_noise_lock;
     reg cfg_tx_prbs31_enable_tb;
     reg cfg_rx_prbs31_enable_tb;
 
-    integer count           ;       // Contador para iterar patron de xgmii_txd
-    integer count_hdr       ;       // Contador de encabezados validos
-    integer count_inv_hdr   ;       // Contador de encabezados invalidos
-    integer count_hdr_consec;       // Contador de encabezados consecutivos
-    integer block_flag      ;       // Bandera para indicar cuando ocurrio el block lock
+    reg [16:0] count        ;       // Contador para iterar patron de xgmii_txd
+    reg [16:0] count_hdr    ;       // Contador de encabezados validos
+    reg [16:0] count_inv_hdr;       // Contador de encabezados invalidos
+    reg [16:0] block_flag   ;       // Bandera para indicar cuando ocurrio el block lock
+    reg [16:0] count_consec ;       // Contador de encabezados validos consecutivos
 
     real random_number;             // Numero random para comparar con BER
 
     localparam TOTAL_HDR = 500  ;   // Cantidad de headers necesarios para imprimir un resultado
-    localparam BER       = 0.076;   // Aproximadamente 0.076 es el limite para activar block lock
+    localparam BER       = 0.035;   // Aproximadamente 0.035 es el limite para activar block lock
 
     initial begin
         $dumpfile("tb_noise_lock.vcd");
@@ -103,39 +103,41 @@ module tb_noise_lock;
     always #5 tx_clk_tb <= ~tx_clk_tb; 
     always #5 rx_clk_tb <= ~rx_clk_tb; 
 
-	always @(posedge rx_clk_tb or posedge rx_rst_tb) begin
-		if (rx_rst_tb) begin
+    always @(posedge rx_clk_tb or posedge rx_rst_tb) begin
+        if (rx_rst_tb) begin
 
-        	serdes_rx_data_tb <= 64'b0;
+            serdes_rx_data_tb <= 64'b0;
             serdes_rx_hdr_tb  <= 2'b0 ;
-		    count_hdr         <= 0    ;
+            count_hdr         <= 0    ;
             count_inv_hdr     <= 0    ;
-		    count_hdr_consec  <= 0    ;
-		    block_flag        <= 0    ;
+            block_flag        <= 0    ;
+            count_consec      <= 0    ;
 
-    	end else begin
-	    	serdes_rx_data_tb <= serdes_tx_data_tb;
+        end else begin
+            serdes_rx_data_tb <= serdes_tx_data_tb;
             random_number     <= $urandom/ (2.0**32 - 1);
 
             if (random_number<BER) begin
                 serdes_rx_hdr_tb <= 2'b11;
                 count_inv_hdr    <= count_inv_hdr + 1;
-				count_hdr_consec <= 0;
+                count_consec     <= 0;
             end else begin
                 serdes_rx_hdr_tb <= 2'b10;
                 count_hdr        <= count_hdr + 1;
-				count_hdr_consec <= count_hdr_consec + 1;
-			    if (rx_block_lock_tb && !block_flag) begin
-					$display("- Headers Enviados hasta activar block lock: %d", count_hdr + count_inv_hdr);
-					block_flag <= 1;
-				end
+                count_consec     <= count_consec + 1;
+                if (count_hdr+count_inv_hdr < TOTAL_HDR) begin
+                    if (rx_block_lock_tb && !block_flag) begin
+                        $display("- Headers Enviados hasta activar block lock: %d", count_hdr + count_inv_hdr);
+                        block_flag <= 1;
+                    end
+                end
             end
 
 			if (count_hdr+count_inv_hdr == TOTAL_HDR) begin
                 $display("BER: %0.05f", BER);
                 $display("Cantidad de Headers Validos:  %0d/%0d", count_hdr, TOTAL_HDR);
                 $display("Cantidad de Headers Invalidos: %0d/%0d", count_inv_hdr, TOTAL_HDR);
-				$display("Block Lock: %d",rx_block_lock_tb);
+				$display("Block Lock: %d\n",rx_block_lock_tb);
             end
 
         end
@@ -209,8 +211,8 @@ module tb_noise_lock;
         count            = 0;   // Contador para iterar patron de xgmii_txd
         count_hdr        = 0;   // Contador de encabezados validos
         count_inv_hdr    = 0;   // Contador de encabezados invalidos
-        count_hdr_consec = 0;   // Contador de encabezados consecutivos
         block_flag       = 0;   // bandera para indicar cuando ocurrio el block lock
+        count_consec     = 0;
 
         #10000
         @(posedge rx_clk_tb);
@@ -224,7 +226,7 @@ module tb_noise_lock;
         #5000
         @(posedge tx_clk_tb);
         tx_rst_tb = 1'b0;
-        #10000
+        #5000
         $finish;
     end
 endmodule
