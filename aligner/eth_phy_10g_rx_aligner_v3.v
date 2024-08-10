@@ -179,7 +179,7 @@ always @(posedge clk) begin
         
 
     end else begin
-        serdes_rx_hdr_reg     <= serdes_rx_two_reg[bitslip_count_reg +: HDR_WIDTH];
+        serdes_rx_hdr_reg     <= serdes_rx_two_reg[bitslip_count_reg +: HDR_WIDTH ];
         serdes_rx_data_reg    <= serdes_rx_two_reg[bitslip_count_reg +: DATA_WIDTH];
         case(state_reg)
 
