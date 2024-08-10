@@ -89,8 +89,6 @@ always @(*) begin
             serdes_rx_prev_reg    = 64'b0                                           ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_reg[TOTAL_WIDTH - 1 : DATA_WIDTH]     ;
-            //serdes_rx_data_reg    = serdes_rx_reg[DATA_WIDTH  - 1 : 0         ]     ;
         end
 
         RESET_CNT: begin
@@ -102,8 +100,6 @@ always @(*) begin
             serdes_rx_prev_reg    = serdes_rx_reg                                   ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_prev_reg[TOTAL_WIDTH - 1 : DATA_WIDTH];
-            //serdes_rx_data_reg    = serdes_rx_prev_reg[DATA_WIDTH  - 1 : 0         ];
         end
 
         TEST_SH: begin
@@ -115,8 +111,6 @@ always @(*) begin
             serdes_rx_prev_reg    = serdes_rx_reg                                   ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_prev_reg[TOTAL_WIDTH - 1 : DATA_WIDTH];
-            //serdes_rx_data_reg    = serdes_rx_prev_reg[DATA_WIDTH  - 1 : 0         ];
         end
 
         VALID_SH: begin
@@ -128,8 +122,6 @@ always @(*) begin
             serdes_rx_prev_reg    = serdes_rx_reg                                   ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_prev_reg[TOTAL_WIDTH - 1 : DATA_WIDTH];
-            //serdes_rx_data_reg    = serdes_rx_prev_reg[DATA_WIDTH  - 1 : 0         ];
         end
 
         INVALID_SH: begin
@@ -141,8 +133,6 @@ always @(*) begin
             serdes_rx_prev_reg    = serdes_rx_reg                                   ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_prev_reg[TOTAL_WIDTH - 1 : DATA_WIDTH];
-            //serdes_rx_data_reg    = serdes_rx_prev_reg[DATA_WIDTH  - 1 : 0         ];
         end
 
         GOOD: begin
@@ -154,8 +144,6 @@ always @(*) begin
             serdes_rx_prev_reg    = serdes_rx_reg                                   ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_prev_reg[TOTAL_WIDTH - 1 : DATA_WIDTH];
-            //serdes_rx_data_reg    = serdes_rx_prev_reg[DATA_WIDTH  - 1 : 0         ];
         end
 
         SLIP: begin
@@ -167,8 +155,6 @@ always @(*) begin
             serdes_rx_prev_reg    = serdes_rx_reg                                   ;
             serdes_rx_reg         = {i_serdes_rx_hdr    , i_serdes_rx_data}         ;
             serdes_rx_two_reg     = {serdes_rx_prev_reg , serdes_rx_reg   }         ;
-            //serdes_rx_hdr_reg     = serdes_rx_two_reg[bitslip_count_reg +: HDR_WIDTH];
-            //serdes_rx_data_reg    = serdes_rx_two_reg[bitslip_count_reg +: DATA_WIDTH];
         end
 
         default: begin
@@ -179,8 +165,6 @@ always @(*) begin
             serdes_rx_bitslip_reg = 1'b0                                            ;
             serdes_rx_prev_reg    = {i_serdes_rx_hdr , i_serdes_rx_data}            ;
             serdes_rx_reg         = {i_serdes_rx_hdr , i_serdes_rx_data}            ;
-            //serdes_rx_hdr_reg     = serdes_rx_reg[TOTAL_WIDTH - 1 : DATA_WIDTH]     ;
-            //serdes_rx_data_reg    = serdes_rx_reg[DATA_WIDTH  - 1 : 0         ]     ;
         end
     endcase
 end
@@ -190,8 +174,8 @@ always @(posedge clk) begin
     if (rst) begin
 
         state_reg             <= LOCK_INIT;
-        serdes_rx_hdr_reg     <= 2'b0;//serdes_rx_two_reg[bitslip_count_reg +: HDR_WIDTH];
-        serdes_rx_data_reg    <= 64'b0;//serdes_rx_two_reg[bitslip_count_reg +: DATA_WIDTH];
+        serdes_rx_hdr_reg     <= 2'b0     ;
+        serdes_rx_data_reg    <= 64'b0    ;
         
 
     end else begin
@@ -228,7 +212,7 @@ always @(posedge clk) begin
             end
 
             INVALID_SH: begin
-                if (&sh_invalid_count_reg && !rx_block_lock_reg) begin
+                if (&sh_invalid_count_reg || !rx_block_lock_reg) begin
                     state_reg <= SLIP;
                 end else begin
                     if (&sh_count_reg) begin

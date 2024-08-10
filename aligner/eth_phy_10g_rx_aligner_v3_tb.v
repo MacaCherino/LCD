@@ -60,6 +60,11 @@ module eth_phy_10g_rx_aligner_v3_tb;
         serdes_rx_hdr_tb  = 2'b11               ;
         
         #100000
+        @(posedge clk_tb);
+        serdes_rx_data_tb = 64'h000000000000002;
+        serdes_rx_hdr_tb  = 2'b00              ;
+        
+        #100000
         
         $finish;
     end
