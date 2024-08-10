@@ -36,16 +36,16 @@ module eth_phy_10g_rx_aligner_v3
 )
 (
 
-    output wire [HDR_WIDTH  - 1             : 0] o_serdes_rx_hdr_align ,
-    output wire [DATA_WIDTH - 1             : 0] o_serdes_rx_data_align, 
-    output wire                                  o_rx_block_lock       ,
-    output wire                                  o_serdes_rx_bitslip   ,
+    output wire [HDR_WIDTH  - 1 : 0] o_serdes_rx_hdr_align ,
+    output wire [DATA_WIDTH - 1 : 0] o_serdes_rx_data_align, 
+    output wire                      o_rx_block_lock       ,
+    output wire                      o_serdes_rx_bitslip   ,
 
-    input  wire [HDR_WIDTH  - 1             : 0] i_serdes_rx_hdr       ,
-    input  wire [DATA_WIDTH - 1             : 0] i_serdes_rx_data      ,
+    input  wire [HDR_WIDTH  - 1 : 0] i_serdes_rx_hdr       ,
+    input  wire [DATA_WIDTH - 1 : 0] i_serdes_rx_data      ,
 
-    input  wire                                  clk                   ,
-    input  wire                                  rst
+    input  wire                      clk                   ,
+    input  wire                      rst
 
 );
 
@@ -62,7 +62,7 @@ localparam [2:0]
     GOOD       = 3'b101,
     SLIP       = 3'b110;
 
-localparam [DATA_WIDTH + HDR_WIDTH - 1 : 0] TOTAL_WIDTH = DATA_WIDTH + HDR_WIDTH;
+localparam [6 : 0] TOTAL_WIDTH = DATA_WIDTH + HDR_WIDTH;
 
 
 reg [5                 : 0] sh_count_reg         ;
